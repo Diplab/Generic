@@ -12,7 +12,8 @@ Generic
 - [泛型介面](#泛型介面)
 - [擦拭(erasure)](#擦拭(erasure))
 - [萬用字元(wildcards)](#萬用字元(wildcards))
-
+	+ [< ? extends T >](#< ? extends T >)
+	+ [< ? super T >](#< ? super T >)
 
 
 ## 前言
@@ -236,6 +237,63 @@ public class Erased {
 
 ##萬用字元(wildcards)
 
-<？>代表的是任何型別都可以接受
+###< ? extends T >
 
+例如，有一個 foo 名稱參考的對象，其型態持有者實例化的對象是實作 List 介面的類別或其子類別，要宣告一個參考名稱，可以使用 '?'「萬用字元」（Wildcard），'?' 代表未知型態，並使用 "extends" 來作限定，例如：
+```java
+    GenericFoo<? extends List> foo = null;
+    foo = new GenericFoo<ArrayList>();
+    foo = new GenericFoo<LinkedList>();
+```
+
+`<? extends List>` 表示型態未知，只知會是實作 List 介面的類別，所以如果型態持有者實例化的對象不是實作 List 介面的類別，則編譯器會回報錯誤，例如以下這行無法通過編譯：
+```java
+    GenericFoo<? extends List> foo = new GenericFoo<HashMap>();
+```
+
+使用 '?' 來作限定，例如若想要自訂一個 showFoo() 方法，方法的內容實作是針對 String 或其子類的實例而制定的，例如：
+```java
+    public void showFoo(GenericFoo foo) {
+    }
+```
+
+如果您不希望任何的型態都可以傳入showFoo() 方法中，您可以使用以下的方式來限定：
+```java
+    public void showFoo(GenericFoo<? extends String> foo) {
+        // 針對String或其子類而制定的內容
+        System.out.println(foo.getFoo());
+    }
+```
+
+在宣告名稱時如果指定了 `<?>` 而不使用 "extends"，則預設是允許 Object 及其下的子類。
+
+那為什麼不直接使用 `GenericFoo` 宣告就好了，何必要用`GenericFoo<?>`來宣告？
+
+例如：
+```java
+    GenericFoo<String> foo = new GenericFoo<String>();
+    foo.setFoo("caterpillar");
+    
+    GenericFoo<?> immutableFoo = foo;
+    // 取得資訊
+    System.out.println(immutableFoo.getFoo());
+
+    // 透過immutableFoo來移去foo所參考實例內的資訊
+    immutableFoo.setFoo(null);
+
+    // 不可透過immutableFoo來設定新的資訊給foo所參考的實例
+    // 所以下面這行無法通過編譯
+    //  immutableFoo.setFoo("123");
+```
+
+使用 `<?>` 或是 `<? extends SomeClass>` 的宣告方式，只能透過該名稱來取得所參考實例的資訊，或是移除某些資訊，但不能增加它的資訊，因為不知道 `<?>` 或是 `<? extends SomeClass>` 宣告的參考名稱，實際上參考的物件，當中確實儲存的是什麼類型的資訊。因為若能加入，被加入的物件同樣也會有失去型態資訊的問題。
+
+
+###< ? super T >
+
+除了 extends ，也可使用 "super" ，例如：
+
+    GenericFoo<? super StringBuilder> foo = null;
+
+如此一來， foo 就只接受 StringBuilder 及其上層的父類型態，也就是只能接受 `GenericFoo<StringBuilder>` 與 `GenericFoo<Object>` 的實例。
 
