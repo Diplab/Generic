@@ -14,7 +14,12 @@ Generic
 - [萬用字元(wildcards)](#萬用字元(wildcards))
 	+ [< ? extends T >](#< ? extends T >)
 	+ [< ? super T >](#< ? super T >)
-
+- [議題(Issues)](#議題(Issues))
+- [自我束縛(self-bounded)的型別](#自我束縛(self-bounded)的型別)
+- [動態型別安全(Dynamic type safety)](#動態型別安全(Dynamic type safety))
+- [異常(Exception)](#異常(Exception))
+- [混成型別(Mixins)](#混成型別(Mixins))
+	+ [混成介面](#混成介面)
 
 ## 前言
 Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些位確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
@@ -257,7 +262,7 @@ public class Erased {
     }
 ```
 
-如果您不希望任何的型態都可以傳入showFoo() 方法中，您可以使用以下的方式來限定：
+如果不希望任何的型態都可以傳入showFoo() 方法中，可以使用以下的方式來限定：
 ```java
     public void showFoo(GenericFoo<? extends String> foo) {
         // 針對String或其子類而制定的內容
@@ -296,4 +301,166 @@ public class Erased {
     GenericFoo<? super StringBuilder> foo = null;
 
 如此一來， foo 就只接受 StringBuilder 及其上層的父類型態，也就是只能接受 `GenericFoo<StringBuilder>` 與 `GenericFoo<Object>` 的實例。
+
+##議題(Issues)
+Java 泛型時所會遇到的問題
+
+- 不能使用基礎型別作為參數
+	+ 像是int或char：ArrayList<int>
+	
+- 實作參數化的界面
+	+ class 不能同時實作同一泛型 interface 的兩種變型，因為擦拭關係，他們會變成相同的 interface 。例如：List<String> 和 List<Integer> 都會因為擦拭變成 List
+
+- 轉型與警告
+	+ 對泛型型別使用轉型並不會有任何效果。
+	+ 因為擦拭關係，無法得知該轉型是否安全，因此，使用 @SuppressWarnings() ，可使編譯器將警告忽略掉。
+
+- 重載
+	+ 由於擦拭，重載方法會產生完全相同的型別
+	```java
+	class UseList<W,T> {
+    // 錯誤：Method f(List<T>) has the same erasure f(List<E>) as another method in type UseList<W,T>
+    void f(List<T> v) {}
+    void f(List<W> v) {}
+}
+```
+- 劫持 interface 的 base class
+	+假設有一個Pet類別，對其他Pet物件而言為ComparablePet
+```java
+class ComparablePet implements Comparable<ComparablePet> {
+    public int compareTo(ComparablePet arg) { return 0; }
+}
+ 
+// Comparable<ComparablePet> and Comparable<Cat>
+// ComparablePet劫持Comparable，只能進行ComparablePet的比較，而不能進行Cat的比較
+class Cat extends ComparablePet implements Comparable<Cat>{
+    // Error: Comparable cannot be inherited with
+    // different arguments: <Cat> and <Pet>
+    public int compareTo(Cat arg) { return 0; }
+}
+
+```
+
+##自我束縛(self-bounded)的型別
+
+
+```java
+class SelfBounded<T extends SelfBounded<T>> {........
+
+```
+##動態型別安全(Dynamic type safety)
+
+因為可將泛型容器傳入 Java SE5 之前的程式碼，所以就是程式碼可能破壞傳入的容器。因此，Java SE5 中提供 static method 檢查問題：checkedCollection(), checkedList(), checkedMap(), checkedSet(), checkedSortedMap(), checkedSortedSet()
+
+```java
+interface Pet{}
+class Dog implements Pet{}
+class Cat implements Pet{}
+public class CheckList {
+
+    // oldStyleMethod()是舊友程式碼
+    @SuppressWarnings("unchecked")
+    static void oldStyleMethod(List probablyDogs) {
+        probablyDogs.add(new Cat());
+    } 
+
+    public static void main(String[] args) {
+        // 沒有check之前是可以的
+        List<Dog> dogs1 = new ArrayList<Dog>();
+        oldStyleMethod(dogs1); // Quietly accepts a Cat
+        // check之後抛出 ClassCastException
+        List<Dog> dogs2 = Collections.checkedList(
+                new ArrayList<Dog>(), Dog.class);
+        try {
+            oldStyleMethod(dogs2); // Throws an exception
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+        // Derived types work fine:
+        List<Pet> pets = Collections.checkedList(
+                new ArrayList<Pet>(), Pet.class);
+        pets.add(new Dog());
+        pets.add(new Cat());
+    }
+}
+```
+##異常(Exception)
+
+因為擦拭關係，泛型機制搭配異常使用會受限制。catch 不能捕捉泛型型別的異常，因為異常的確切型別再編譯時期與執行時期都必須是確知的。不過，在 method 定義時的 throws 可使用型別參數。
+
+```java
+interface Processor<T,E extends Exception> {
+    void process(List<T> resultCollector) throws E; // 抛出泛型異常
+}
+```
+##混成型別(Mixins)
+
+基本概念是混合來自多個classes的能力，以得到表示混合所有型別的class。混成型別價值之一在於，能套用多個classes的特性及行為。
+
+###混成介面
+
+Mixin 類別基本上是利用委任(delegation)，所以每個混進的型別都需要一個欄位，而且必須撰寫所有必要的 methods，將方法傳遞至合適物件。
+- 缺點是隨著混入更複雜的class，程式碼便會增長迅速。
+
+```java
+interface TimeStamped { long getStamp(); }
+
+class TimeStampedImp implements TimeStamped {
+    private final long timeStamp;
+    public TimeStampedImp() {
+        timeStamp = new Date().getTime();
+    }
+    public long getStamp() { return timeStamp; }
+}
+
+interface SerialNumbered { long getSerialNumber(); }
+
+class SerialNumberedImp implements SerialNumbered {
+    private static long counter = 1;
+    private final long serialNumber = counter++;
+    public long getSerialNumber() { return serialNumber; }
+}
+
+interface Basic {
+    public void set(String val);
+    public String get();
+}
+
+class BasicImp implements Basic {
+    private String value;
+    public void set(String val) { value = val; }
+    public String get() { return value; }
+}
+
+```
+每個混進的型別都需要一個欄位
+```java
+class Mixin extends BasicImp
+implements TimeStamped, SerialNumbered {
+    // 混入class對應的欄位
+    private TimeStamped timeStamp = new TimeStampedImp();
+    // 混入class對應的欄位
+    private SerialNumbered serialNumber =
+            new SerialNumberedImp();
+    // 在Mixin中撰寫所有必须的方法，將方法傳遞至合適物件:
+    public long getStamp() { return timeStamp.getStamp(); }
+    public long getSerialNumber() {
+        return serialNumber.getSerialNumber();
+    }
+}
+
+public class Mixin {
+
+    public static void main(String[] args) {
+        Mixin mixin1 = new Mixin(), mixin2 = new Mixin();
+        mixin1.set("test string 1");
+        mixin2.set("test string 2");
+        System.out.println(mixin1.get() + " " +
+          mixin1.getStamp() +  " " + mixin1.getSerialNumber());
+        System.out.println(mixin2.get() + " " +
+          mixin2.getStamp() +  " " + mixin2.getSerialNumber());
+    }
+}
+```
+
 
