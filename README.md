@@ -8,6 +8,7 @@ Generic
 - [泛型入門](#泛型入門)
     + [沒有泛型](#沒有泛型)
     + [有泛型](#有泛型)
+    + [有序表(tuple)](#有序表(tuple))
 
 ## 前言
 Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些位確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
@@ -127,3 +128,54 @@ public class GenericFooDemo {
     }
 }
 ```
+
+###有序表(tuple)
+
+有序表是一種直接將一群物件包覆在一起而成的單一物件。每一個在有序表中的物件都可以是不同型別。在使用有序表時，只需要直接定義適當長度的有序表作為 method 的回傳值，並在 return 時傳回。
+
+**範例6  GenericFoo2.java**
+```java
+public class GenericFoo2<T1, T2> {
+    private T1 foo1;
+    private T2 foo2;
+ 
+    public void setFoo1(T1 foo1) {
+        this.foo1 = foo1;
+    }
+ 
+    public T1 getFoo1() {
+        return foo1;
+    }
+ 
+    public void setFoo2(T2 foo2) {
+        this.foo2 = foo2;
+    }
+ 
+    public T2 getFoo2() {
+        return foo2;
+    }
+}
+```
+使用 GenericFoo2 類別，分別以 Integer 與 Boolean 設定 T1 與 T2 ：
+```java
+    GenericFoo<Integer, Boolean> foo = 
+                  new GenericFoo<Integer, Boolean>();
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
