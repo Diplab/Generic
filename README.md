@@ -15,14 +15,13 @@ Generic
 	+ [< ? extends T >](#< ? extends T >)
 	+ [< ? super T >](#< ? super T >)
 - [議題(Issues)](#議題(Issues))
-- [自我束縛(self-bounded)的型別](#自我束縛(self-bounded)的型別)
 - [動態型別安全(Dynamic type safety)](#動態型別安全(Dynamic type safety))
 - [異常(Exception)](#異常(Exception))
 - [混成型別(Mixins)](#混成型別(Mixins))
 	+ [混成介面](#混成介面)
 
 ## 前言
-Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些位確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
+Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些未確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
 
 ##泛型的定義
 
@@ -172,6 +171,45 @@ public class GenericFoo2<T1, T2> {
     GenericFoo<Integer, Boolean> foo = new GenericFoo<Integer, Boolean>();
 
 ```
+
+**Map應用**
+```java
+public class test {
+	public static void main(String[] args) {
+        Map<String, String> map =  new TreeMap<String, String>();
+        map.put("dog", "DOG");
+        map.put("cat", "CAT");
+        map.put("bird", "BIRD");
+
+        for(String value : map.values()) {
+            System.out.println(value);    
+        }
+    }	
+}
+```
+
+
+
+
+再如範例6-1 寫一個子類別擴充範例6 的父類別。
+
+#### **範例6-1 SubGenericFoo4.java**
+```java
+public class SubGenericFoo2<T1, T2, T3> 
+                extends GenericFoo2<T1, T2> {
+    private T3 foo3;
+  
+    public void setFoo3(T3 foo3) {
+        this.foo3 = foo3;
+    }
+ 
+    public T3 getFoo3() {
+        return foo3;
+    }
+}
+```
+
+如果決定要保留型態持有者，則父類別上宣告的型態持有者數目在繼承下來時必須寫齊全，也就是說在範例6-1 中，父類別上 GenericFoo2 上出現的 T1 與 T2 在 SubGenericFoo2 中都要出現，如果不保留型態持有者，則繼承下來的 T1 與 T2 自動變為 Object，建議是父類別的型態持有者都要保留。
 
 ##泛型介面
 
@@ -341,13 +379,6 @@ class Cat extends ComparablePet implements Comparable<Cat>{
 
 ```
 
-##自我束縛(self-bounded)的型別
-
-
-```java
-class SelfBounded<T extends SelfBounded<T>> {........
-
-```
 ##動態型別安全(Dynamic type safety)
 
 因為可將泛型容器傳入 Java SE5 之前的程式碼，所以就是程式碼可能破壞傳入的容器。因此，Java SE5 中提供 static method 檢查問題：checkedCollection(), checkedList(), checkedMap(), checkedSet(), checkedSortedMap(), checkedSortedSet()
