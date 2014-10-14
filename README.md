@@ -19,6 +19,7 @@ Generic
 - [異常(Exception)](#異常(Exception))
 - [混成型別(Mixins)](#混成型別(Mixins))
 	+ [混成介面](#混成介面)
+- [參考文獻](#參考文獻)
 
 ## 前言
 Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些未確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
@@ -494,4 +495,7 @@ public class Mixin {
 }
 ```
 
-
+##參考文獻
+- [java with Generics](http://cloudlife2013.blogspot.tw/2013/09/generics.html)
+- [java 學習章節 12章](http://mis.hwai.edu.tw/~kevin/MISProject/JAVAProject/content.htm)
+- [SCJP 認證教戰手冊](https://docs.google.com/a/mail1.ncnu.edu.tw/file/d/0BxoRjjtYAmGnLVhwREFRSkU2RXM/edit)
