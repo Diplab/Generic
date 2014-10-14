@@ -19,7 +19,10 @@ Generic
 - [異常(Exception)](#異常(Exception))
 - [混成型別(Mixins)](#混成型別(Mixins))
 	+ [混成介面](#混成介面)
+- [彌補泛型不足](#彌補泛型不足)
+	+ [映射(reflection)](#映射(reflection))
 - [參考文獻](#參考文獻)
+
 
 ## 前言
 Java單一繼承體系的架構過於侷限。如果是interface而非class，便可讓這個限制鬆綁。但interface在使用上必須實作特定的interface，因此仍過於受限。如果能讓程式碼操作"某些未確定型別"，就可不再受限於特定的interface或是class。這就是"泛型"的概念，他是Java SE5中重要的改變。
@@ -495,7 +498,64 @@ public class Mixin {
 }
 ```
 
+##彌補泛型不足
+
+有時泛型不不是那麼好用，在某些情形下，最終可能會用一般的 class 或 interface 來取代。因為受限的泛型和明確指定 class 或 interface
+可能沒有差別。
+
+###映射(reflection)
+
+動態相關機制：Reflection。用在 Java 上指的是我們可以於執行期載入、探知、使用編譯期間完全未知的 classes。
+
+```java
+
+class Mime {
+    public void walkAgainstTheWind() {}
+    public void sit() { System.out.println("Pretending to sit"); }
+    public void pushInvisibleWalls() {}
+    public String toString() { return "Mime"; }
+}
+
+class SmartDog {
+    public void speak() { System.out.println("Woof!"); }
+    public void sit() { System.out.println("Sitting"); }
+    public void reproduce() {}
+}
+
+class CommunicateReflectively {
+    public static void perform(Object speaker) {
+        Class<?> spkr = speaker.getClass();
+        try {
+            try {
+                Method speak = spkr.getMethod("speak");
+                speak.invoke(speaker);
+            } catch(NoSuchMethodException e) {
+                System.out.println(speaker + " cannot speak");
+            }
+            try {
+                Method sit = spkr.getMethod("sit");
+                sit.invoke(speaker);
+            } catch(NoSuchMethodException e) {
+                System.out.println(speaker + " cannot sit");
+            }
+        } catch(Exception e) {
+            throw new RuntimeException(speaker.toString(), e);
+        }
+    }
+}
+
+public class Demo {
+
+    public static void main(String[] args) {
+        CommunicateReflectively.perform(new SmartDog());
+        CommunicateReflectively.perform(new Mime());
+    }
+}
+```
+這個範例中，class完全不相干，也沒有相同的 base class (除了 Object)，或是 interface。但利用 CommunicateReflectively.perform() 能動態建立 method (不論所需 method 是否存在)，並加以呼叫。像是 Mime 只有一個所需的 method 的情況，也可以達到目標。
+
 ##參考文獻
 - [java with Generics](http://cloudlife2013.blogspot.tw/2013/09/generics.html)
 - [java 學習章節 12章](http://mis.hwai.edu.tw/~kevin/MISProject/JAVAProject/content.htm)
 - [SCJP 認證教戰手冊](https://docs.google.com/a/mail1.ncnu.edu.tw/file/d/0BxoRjjtYAmGnLVhwREFRSkU2RXM/edit)
+- [java reflection](http://jjhou.boolan.com/javatwo-2004-reflection.pdf)
