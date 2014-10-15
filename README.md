@@ -348,14 +348,14 @@ public class Erased {
 Java 泛型時所會遇到的問題
 
 - 不能使用基礎型別作為參數
-	+ 像是int或char：ArrayList<int>
+	+ 像是int或char：`ArrayList<int>`
 	
 - 實作參數化的界面
-	+ class 不能同時實作同一泛型 interface 的兩種變型，因為擦拭關係，他們會變成相同的 interface 。例如：List<String> 和 List<Integer> 都會因為擦拭變成 List
+	+ class 不能同時實作同一泛型 interface 的兩種變型，因為擦拭關係，他們會變成相同的 interface 。例如：`List<String>` 和 `List<Integer>` 都會因為擦拭變成 List
 
 - 轉型與警告
 	+ 對泛型型別使用轉型並不會有任何效果。
-	+ 因為擦拭關係，無法得知該轉型是否安全，因此，使用 @SuppressWarnings() ，可使編譯器將警告忽略掉。
+	+ 因為擦拭關係，無法得知該轉型是否安全，因此，使用 `@SuppressWarnings()` ，可使編譯器將警告忽略掉。
 
 - 重載
 	+ 由於擦拭，重載方法會產生完全相同的型別
@@ -393,7 +393,7 @@ class Dog implements Pet{}
 class Cat implements Pet{}
 public class CheckList {
 
-    // oldStyleMethod()是舊友程式碼
+    // oldStyleMethod()是舊有程式碼
     @SuppressWarnings("unchecked")
     static void oldStyleMethod(List probablyDogs) {
         probablyDogs.add(new Cat());
@@ -478,7 +478,8 @@ implements TimeStamped, SerialNumbered {
     private SerialNumbered serialNumber =
             new SerialNumberedImp();
     // 在Mixin中撰寫所有必须的方法，將方法傳遞至合適物件:
-    public long getStamp() { return timeStamp.getStamp(); }
+    public long getStamp() { 
+    	return timeStamp.getStamp(); }
     public long getSerialNumber() {
         return serialNumber.getSerialNumber();
     }
