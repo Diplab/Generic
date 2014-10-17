@@ -1,6 +1,5 @@
 package generic;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class Holder<T> {
     private T value;
