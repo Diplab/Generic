@@ -6,6 +6,9 @@ package generic;
 import java.util.Arrays;
 
 /**
+ * The value of self-bounding is <b>covariant argument types</b>.</br> Note:
+ * <b>covariant return types</b> are introduced when JavaSE 5.
+ * 
  * @author timmy00274672
  * 
  */
