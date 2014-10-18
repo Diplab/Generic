@@ -7,10 +7,13 @@ import java.util.Arrays;
 
 /**
  * The value of self-bounding is <b>covariant argument types</b>.</br> Note:
- * <b>covariant return types</b> are introduced when JavaSE 5.
+ * <b>covariant return types</b> are introduced when JavaSE 5.</br>
+ * {@link AbstractMethod} shows selfbounding makes covariant argument types
+ * possible.
  * 
  * @author timmy00274672
- * 
+ * @see OrdinaryArguments
+ * @see AbstractMethod
  */
 public class SelfBounding<T extends SelfBounding<T>> {
 
