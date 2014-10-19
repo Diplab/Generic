@@ -8,7 +8,7 @@ class Cat implements Pet{}
 public class CheckList {
 
     // oldStyleMethod()是舊友程式碼
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     static void oldStyleMethod(List probablyDogs) {
         probablyDogs.add(new Cat());
     } 
